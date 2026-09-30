@@ -1,0 +1,12 @@
+
+> cv-builder@0.1.0 dev
+> next dev --port 3100
+
+▲ Next.js 16.3.8 (Turbopack)
+- Local:         http://localhost:3100
+- Network:       http://192.168.1.10:3100
+✓ Ready in 502ms
+✓ Running next.config.ts took 32ms
+
+ GET / 200 in 2.2s (next.js: 2.1s, application-code: 85ms)
+ GET / 200 in 24ms (next.js: 9ms, application-code: 15ms)
