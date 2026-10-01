@@ -57,7 +57,7 @@ function CountryPhotoSection() {
           {r.settings.photoDataUrl ? (
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={r.settings.photoDataUrl} alt="Resume headshot" className="h-16 w-16 rounded object-cover" />
+              <img src={r.settings.photoDataUrl} alt="Resume headshot" className="h-16 w-16 rounded-full object-cover" />
               <div className="space-x-2">
                 <label className="cursor-pointer text-sm font-medium text-slate-700 underline">
                   Replace

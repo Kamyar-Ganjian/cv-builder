@@ -34,6 +34,37 @@ export function dataUrlImageType(dataUrl: string): 'png' | 'jpg' | 'gif' | 'bmp'
   return 'png';
 }
 
+/**
+ * Center-crop a photo to a circle on a transparent PNG, for exports that
+ * cannot clip images themselves (docx). Browser-only: when canvas is
+ * unavailable (e.g. Node smoke tests) the original data URL is returned,
+ * which simply yields a square photo there.
+ */
+export async function circleCropDataUrl(dataUrl: string, size = 300): Promise<string> {
+  if (typeof document === 'undefined') return dataUrl;
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = reject;
+      el.src = dataUrl;
+    });
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) return dataUrl;
+    ctx.canvas.width = size;
+    ctx.canvas.height = size;
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    if (!side) return dataUrl;
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+    return ctx.canvas.toDataURL('image/png');
+  } catch {
+    return dataUrl;
+  }
+}
+
 export function slugify(v: string): string {
   return v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'resume';
 }

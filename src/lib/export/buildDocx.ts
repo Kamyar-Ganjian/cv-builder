@@ -14,7 +14,7 @@ import {
 } from 'docx';
 import { fmtDate } from '../analysis/plainText';
 import { MAIN_SECTIONS, SECTION_LABELS, SIDEBAR_SECTIONS, type Resume, type SectionId } from '../types';
-import { dataUrlImageType, dataUrlToBytes, visibleSections } from './shared';
+import { circleCropDataUrl, dataUrlImageType, dataUrlToBytes, visibleSections } from './shared';
 
 /**
  * .docx export - the zero-risk format for legacy ATS (Taleo, iCIMS, older Workday).
@@ -134,11 +134,12 @@ export async function buildDocx(r: Resume): Promise<Blob> {
 
   // --- Contact block (body, never header/footer) ---
   const photo = r.settings.showPhoto && r.settings.photoDataUrl;
-  const photoRun = photo
+  const photoDataUrl = photo ? await circleCropDataUrl(r.settings.photoDataUrl!) : null;
+  const photoRun = photoDataUrl
     ? new ImageRun({
-        type: dataUrlImageType(r.settings.photoDataUrl!),
-        data: dataUrlToBytes(r.settings.photoDataUrl!),
-        transformation: { width: 98, height: 121 },
+        type: dataUrlImageType(photoDataUrl),
+        data: dataUrlToBytes(photoDataUrl),
+        transformation: { width: 112, height: 112 },
         floating: {
           horizontalPosition: { relative: HorizontalPositionRelativeFrom.MARGIN, align: HorizontalPositionAlign.RIGHT },
           verticalPosition: { relative: VerticalPositionRelativeFrom.PARAGRAPH, offset: 0 },

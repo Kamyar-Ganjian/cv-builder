@@ -223,8 +223,8 @@ export function ResumePreview() {
               <img
                 src={r.settings.photoDataUrl!}
                 alt=""
-                className="shrink-0 rounded-[3px] object-cover"
-                style={{ width: '26mm', height: '32mm' }}
+                className="shrink-0 rounded-full object-cover"
+                style={{ width: '30mm', height: '30mm' }}
               />
             )}
           </header>

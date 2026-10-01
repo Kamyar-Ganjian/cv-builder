@@ -37,7 +37,7 @@ function makeStyles(r: Resume) {
     name: { fontSize: r.settings.fontSize * 1.85, color: accent, fontFamily: pdfFont(r.settings.fontFamily), lineHeight: 1.15 },
     title: { fontSize: r.settings.fontSize * 1.15, color: '#334155', marginTop: 2 },
     contactLine: { fontSize: r.settings.fontSize * 0.95, marginTop: 2 },
-    photo: { width: 74, height: 91, borderRadius: 2, objectFit: 'cover' },
+    photo: { width: 85, height: 85, borderRadius: 42.5, objectFit: 'cover' },
     sectionHead: {
       fontSize: r.settings.fontSize * 1.05,
       color: accent,
