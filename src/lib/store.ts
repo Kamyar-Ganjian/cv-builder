@@ -114,9 +114,11 @@ export const useBuilder = create<BuilderState>()(
           if (!data || typeof data !== 'object' || !data.contact || !data.settings) {
             return { ok: false, error: 'Not a valid resume file.' };
           }
+          const defaults = createEmptyResume(data.name || 'Imported Resume');
           const migrated: Resume = {
-            ...createEmptyResume(data.name || 'Imported Resume'),
+            ...defaults,
             ...data,
+            contact: { ...defaults.contact, ...data.contact },
             settings: { ...defaultSettings(data.settings.country), ...data.settings },
             id: uid(),
             updatedAt: Date.now(),
@@ -132,7 +134,29 @@ export const useBuilder = create<BuilderState>()(
     }),
     {
       name: 'cv-builder-v1',
-      version: 1,
+      version: 3,
+      migrate: (persistedState, version) => {
+        if (version < 3) {
+          const state = persistedState as Partial<BuilderState>;
+          const resumes = Object.fromEntries(
+            Object.entries(state.resumes ?? {}).map(([id, resume]) => [
+              id,
+              {
+                ...resume,
+                contact: {
+                  ...resume.contact,
+                  github: resume.contact.github ?? '',
+                  linkedinText: resume.contact.linkedinText ?? '',
+                  githubText: resume.contact.githubText ?? '',
+                  websiteText: resume.contact.websiteText ?? '',
+                },
+              },
+            ])
+          );
+          return { ...state, resumes };
+        }
+        return persistedState as BuilderState;
+      },
     }
   )
 );

@@ -1,4 +1,5 @@
 import type { Resume } from '../types';
+import { getContactLinks } from '../contactLinks';
 
 /**
  * Lightweight, fully client-side keyword extraction for job descriptions.
@@ -100,8 +101,7 @@ export function resumeToText(r: Resume): string {
     r.contact.email,
     r.contact.phone,
     r.contact.location,
-    r.contact.linkedin,
-    r.contact.website,
+    ...getContactLinks(r.contact).map((link) => link.text),
     r.summary,
   ];
   for (const s of r.skills) parts.push(s.name, s.skills);

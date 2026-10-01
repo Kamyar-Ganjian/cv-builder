@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { fmtDate } from '../../lib/analysis/plainText';
 import { estimatePages } from '../../lib/analysis/estimate';
+import { getContactDetails, getContactLinks, groupContactLinks } from '../../lib/contactLinks';
 import { useActiveResume } from '../../lib/store';
+import { normalizeWebUrl } from '../../lib/urls';
 import {
   MAIN_SECTIONS,
   SECTION_LABELS,
@@ -107,7 +109,13 @@ function SectionBody({ r, id }: { r: Resume; id: SectionId }) {
             <div key={p.id}>
               <div className="flex items-baseline justify-between gap-2">
                 <b>{p.name}</b>
-                {p.link && <span className="shrink-0" style={{ fontSize: '0.92em' }}>{p.link}</span>}
+                {p.link && (
+                  <span className="shrink-0" style={{ fontSize: '0.92em' }}>
+                    {normalizeWebUrl(p.link) ? (
+                      <a href={normalizeWebUrl(p.link)!} target="_blank" rel="noreferrer" className="underline">{p.link}</a>
+                    ) : p.link}
+                  </span>
+                )}
               </div>
               {p.tech.trim() && <div style={{ fontSize: '0.92em', color: '#475569' }}>Tech: {p.tech}</div>}
               <Bullets items={p.bullets} />
@@ -184,8 +192,9 @@ export function ResumePreview() {
   const pages = estimatePages(r);
   const photo = r.settings.showPhoto && r.settings.photoDataUrl;
 
-  const contactLine = [r.contact.email, r.contact.phone, r.contact.location].filter(Boolean);
-  const linkLine = [r.contact.linkedin, r.contact.website].filter(Boolean);
+  const contactLine = getContactDetails(r.contact);
+  const linkLine = getContactLinks(r.contact);
+  const linkRows = groupContactLinks(linkLine);
 
   return (
     <div>
@@ -214,8 +223,30 @@ export function ResumePreview() {
                 </div>
               )}
               <div className="mt-1 space-y-[1px]" style={{ fontSize: '0.95em' }}>
-                {contactLine.length > 0 && <div>{contactLine.join('  |  ')}</div>}
-                {linkLine.length > 0 && <div>{linkLine.join('  |  ')}</div>}
+                {contactLine.length > 0 && (
+                  <div>
+                    {contactLine.map((detail, index) => (
+                      <span key={detail.key}>
+                        {index > 0 && '  |  '}
+                        {detail.href ? <a href={detail.href} className="underline">{detail.text}</a> : detail.text}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {linkLine.length > 0 && (
+                  <div className="space-y-[1px]">
+                    {linkRows.map((row) => (
+                      <div key={row[0].key} className="flex flex-wrap gap-x-2">
+                        {row.map((link, index) => (
+                          <span key={link.key} className="whitespace-nowrap">
+                            {link.href ? <a href={link.href} target="_blank" rel="noreferrer" className="underline">{link.text}</a> : link.text}
+                            {index < row.length - 1 ? '  |' : ''}
+                          </span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             {photo && (

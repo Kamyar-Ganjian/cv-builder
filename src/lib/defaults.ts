@@ -67,7 +67,11 @@ const emptyContact = {
   phone: '',
   location: '',
   linkedin: '',
+  linkedinText: '',
+  github: '',
+  githubText: '',
   website: '',
+  websiteText: '',
 };
 
 export function createEmptyResume(name: string, countryCode?: string): Resume {

@@ -11,7 +11,11 @@ export function createSampleResume(): Resume {
     phone: '+1 (415) 555-0132',
     location: 'San Francisco, CA',
     linkedin: 'linkedin.com/in/alexmorgan',
+    linkedinText: '',
+    github: 'github.com/alexmorgan',
+    githubText: '',
     website: 'alexmorgan.dev',
+    websiteText: '',
   };
   r.summary =
     'Senior Frontend Engineer with 7 years of experience building high-traffic React and TypeScript applications. Cut load times 43% and lifted conversion 12% for a platform serving 2M monthly users. Deep expertise in Next.js, performance optimization, and design systems.';

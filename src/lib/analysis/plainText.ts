@@ -1,4 +1,5 @@
 import { MAIN_SECTIONS, SECTION_LABELS, SIDEBAR_SECTIONS, type Resume, type SectionId } from '../types';
+import { getContactLinks } from '../contactLinks';
 
 /**
  * Simulates what an ATS text extractor sees: pure linear text in document order.
@@ -9,7 +10,7 @@ export function toPlainText(r: Resume): string {
   const c = r.contact;
   if (c.fullName) lines.push(c.fullName.toUpperCase());
   if (c.jobTitle) lines.push(c.jobTitle);
-  const contactLine = [c.email, c.phone, c.location, c.linkedin, c.website].filter(Boolean).join(' | ');
+  const contactLine = [c.email, c.phone, c.location, ...getContactLinks(c).map((link) => link.text)].filter(Boolean).join(' | ');
   if (contactLine) lines.push(contactLine);
   lines.push('');
 

@@ -1,6 +1,7 @@
 import {
   BorderStyle,
   Document,
+  ExternalHyperlink,
   HorizontalPositionAlign,
   HorizontalPositionRelativeFrom,
   ImageRun,
@@ -13,6 +14,8 @@ import {
   VerticalPositionRelativeFrom,
 } from 'docx';
 import { fmtDate } from '../analysis/plainText';
+import { getContactDetails, getContactLinks, groupContactLinks } from '../contactLinks';
+import { normalizeWebUrl } from '../urls';
 import { MAIN_SECTIONS, SECTION_LABELS, SIDEBAR_SECTIONS, type Resume, type SectionId } from '../types';
 import { circleCropDataUrl, dataUrlImageType, dataUrlToBytes, visibleSections } from './shared';
 
@@ -42,6 +45,11 @@ export async function buildDocx(r: Resume): Promise<Blob> {
   const run = (text: string, opts: { bold?: boolean; color?: string; size?: number } = {}) =>
     new TextRun({ text, font, bold: opts.bold, color: opts.color ?? '111827', size: opts.size ?? halfPt });
 
+  const hyperlink = (value: string): ExternalHyperlink | TextRun => {
+    const url = normalizeWebUrl(value);
+    return url ? new ExternalHyperlink({ link: url, children: [run(value)] }) : run(value);
+  };
+
   const rightTab = [{ type: TabStopType.RIGHT, position: contentW }];
 
   const headPara = (label: string) =>
@@ -59,9 +67,9 @@ export async function buildDocx(r: Resume): Promise<Blob> {
       spacing: { after: 20 },
     });
 
-  const entryHead = (left: string, right: string) =>
+  const entryHead = (left: string, right: string | ExternalHyperlink | TextRun) =>
     new Paragraph({
-      children: [run(left, { bold: true }), ...(right ? [new TextRun({ text: '\t' }), run(right, { size: halfPt - 1 })] : [])],
+      children: [run(left, { bold: true }), ...(right ? [new TextRun({ text: '\t' }), typeof right === 'string' ? run(right, { size: halfPt - 1 }) : right] : [])],
       tabStops: right ? rightTab : undefined,
       spacing: { before: 100, after: 10 },
       keepNext: true,
@@ -95,7 +103,7 @@ export async function buildDocx(r: Resume): Promise<Blob> {
         });
       case 'projects':
         return r.projects.filter((p) => p.name.trim()).flatMap((p) => {
-          const paras: Paragraph[] = [entryHead(p.name, p.link)];
+          const paras: Paragraph[] = [entryHead(p.name, p.link ? hyperlink(p.link) : '')];
           if (p.tech.trim()) paras.push(new Paragraph({ children: [run(`Tech: ${p.tech}`, { color: '475569', size: halfPt - 1 })], spacing: { after: 10 }, keepNext: true }));
           paras.push(...p.bullets.filter((b) => b.trim()).map((b) => bulletPara(b)));
           return paras;
@@ -149,8 +157,9 @@ export async function buildDocx(r: Resume): Promise<Blob> {
       })
     : null;
 
-  const contactLine = [r.contact.email, r.contact.phone, r.contact.location].filter(Boolean);
-  const linkLine = [r.contact.linkedin, r.contact.website].filter(Boolean);
+  const contactLine = getContactDetails(r.contact);
+  const linkLine = getContactLinks(r.contact);
+  const linkRows = groupContactLinks(linkLine);
 
   const headerParas: Paragraph[] = [
     new Paragraph({
@@ -159,8 +168,26 @@ export async function buildDocx(r: Resume): Promise<Blob> {
     }),
   ];
   if (r.contact.jobTitle) headerParas.push(new Paragraph({ children: [run(r.contact.jobTitle, { color: '334155', size: halfPt + 4 })], spacing: { after: 30 } }));
-  if (contactLine.length) headerParas.push(new Paragraph({ children: [run(contactLine.join('  |  '), { size: halfPt - 1 })], spacing: { after: 10 } }));
-  if (linkLine.length) headerParas.push(new Paragraph({ children: [run(linkLine.join('  |  '), { size: halfPt - 1 })], spacing: { after: 10 } }));
+  if (contactLine.length) {
+    headerParas.push(new Paragraph({
+      children: contactLine.flatMap((detail, index) => [
+        ...(index > 0 ? [run('  |  ', { size: halfPt - 1 })] : []),
+        detail.href ? new ExternalHyperlink({ link: detail.href, children: [run(detail.text, { size: halfPt - 1 })] }) : run(detail.text, { size: halfPt - 1 }),
+      ]),
+      spacing: { after: 10 },
+    }));
+  }
+  if (linkLine.length) {
+    for (const row of linkRows) {
+      headerParas.push(new Paragraph({
+        children: row.flatMap((link, index) => [
+          ...(index > 0 ? [run('  |  ', { size: halfPt - 1 })] : []),
+          link.href ? new ExternalHyperlink({ link: link.href, children: [run(link.text)] }) : run(link.text),
+        ]),
+        spacing: { after: 10 },
+      }));
+    }
+  }
 
   // --- Sections ---
   const visible = visibleSections(r);

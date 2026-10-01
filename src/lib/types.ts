@@ -35,7 +35,11 @@ export interface ContactInfo {
   phone: string;
   location: string;
   linkedin: string;
+  linkedinText: string;
+  github: string;
+  githubText: string;
   website: string;
+  websiteText: string;
 }
 
 export interface SkillCategory {

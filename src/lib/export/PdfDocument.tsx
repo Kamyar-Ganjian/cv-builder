@@ -1,6 +1,8 @@
 import { Document, Image, Link, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import React from 'react';
 import { fmtDate } from '../analysis/plainText';
+import { getContactDetails, getContactLinks, groupContactLinks } from '../contactLinks';
+import { normalizeWebUrl } from '../urls';
 import { visibleSections } from './shared';
 import {
   MAIN_SECTIONS,
@@ -142,7 +144,11 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
             <View key={p.id} wrap={false}>
               <View style={s.entryHead}>
                 <Text style={s.bold}>{p.name}</Text>
-                {p.link ? <Text style={s.small}>{p.link}</Text> : null}
+                {p.link ? (
+                  <Text style={s.small}>
+                    {normalizeWebUrl(p.link) ? <Link src={normalizeWebUrl(p.link)!} style={s.link}>{p.link}</Link> : p.link}
+                  </Text>
+                ) : null}
               </View>
               {p.tech.trim() ? <Text style={s.muted}>Tech: {p.tech}</Text> : null}
               <Bullets items={p.bullets} s={s} />
@@ -183,10 +189,6 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
   }
 }
 
-function asUrl(v: string): string {
-  return /^https?:\/\//i.test(v) ? v : `https://${v}`;
-}
-
 export function PdfDocument({ resume: r }: { resume: Resume }) {
   const s = makeStyles(r);
   const visible = visibleSections(r);
@@ -194,8 +196,9 @@ export function PdfDocument({ resume: r }: { resume: Resume }) {
   const sideIds = visible.filter((id) => SIDEBAR_SECTIONS.includes(id));
   const photo = r.settings.showPhoto && r.settings.photoDataUrl;
 
-  const contactLine = [r.contact.email, r.contact.phone, r.contact.location].filter(Boolean);
-  const linkLine = [r.contact.linkedin, r.contact.website].filter(Boolean);
+  const contactLine = getContactDetails(r.contact);
+  const linkLine = getContactLinks(r.contact);
+  const linkRows = groupContactLinks(linkLine);
 
   const renderSection = (id: SectionId) => (
     <View key={id}>
@@ -211,17 +214,27 @@ export function PdfDocument({ resume: r }: { resume: Resume }) {
           <View style={{ flex: 1, paddingRight: photo ? 10 : 0 }}>
             <Text style={s.name}>{r.contact.fullName || 'Your Name'}</Text>
             {r.contact.jobTitle ? <Text style={s.title}>{r.contact.jobTitle}</Text> : null}
-            {contactLine.length > 0 ? <Text style={s.contactLine}>{contactLine.join('  |  ')}</Text> : null}
-            {linkLine.length > 0 ? (
+            {contactLine.length > 0 ? (
               <Text style={s.contactLine}>
-                {r.contact.linkedin ? (
-                  <Link src={asUrl(r.contact.linkedin)} style={s.link}>{r.contact.linkedin}</Link>
-                ) : null}
-                {r.contact.linkedin && r.contact.website ? '  |  ' : ''}
-                {r.contact.website ? (
-                  <Link src={asUrl(r.contact.website)} style={s.link}>{r.contact.website}</Link>
-                ) : null}
+                {contactLine.map((detail, index) => (
+                  <React.Fragment key={detail.key}>
+                    {index > 0 ? '  |  ' : ''}
+                    {detail.href ? <Link src={detail.href} style={s.link}>{detail.text}</Link> : detail.text}
+                  </React.Fragment>
+                ))}
               </Text>
+            ) : null}
+            {linkLine.length > 0 ? (
+              linkRows.map((row) => (
+                <Text key={row[0].key} style={s.contactLine}>
+                  {row.map((link, index) => (
+                    <React.Fragment key={link.key}>
+                      {index > 0 ? '  |  ' : ''}
+                      {link.href ? <Link src={link.href} style={s.link}>{link.text}</Link> : link.text}
+                    </React.Fragment>
+                  ))}
+                </Text>
+              ))
             ) : null}
           </View>
           {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt prop */}
