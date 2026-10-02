@@ -127,8 +127,8 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
                 <Text style={s.bold}>{[e.degree, e.field].filter(Boolean).join(', ')}</Text>
                 <Text style={s.small}>
                   {fmtDate(e.startDate)}
-                  {e.startDate && e.endDate ? ' - ' : ''}
-                  {fmtDate(e.endDate)}
+                  {e.startDate || e.endDate || e.current ? ' - ' : ''}
+                  {e.current ? 'Present' : fmtDate(e.endDate)}
                 </Text>
               </View>
               <Text>{[e.school, e.location].filter(Boolean).join(', ')}</Text>

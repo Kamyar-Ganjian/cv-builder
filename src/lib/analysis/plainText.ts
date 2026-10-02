@@ -68,7 +68,7 @@ function sectionPlainText(r: Resume, id: SectionId): string | null {
         .filter((e) => e.school.trim() || e.degree.trim())
         .map((e) => {
           const deg = [e.degree, e.field].filter(Boolean).join(', ');
-          const dates = `${fmtDate(e.startDate)} - ${fmtDate(e.endDate)}`.replace(/^ - $/, '');
+          const dates = `${fmtDate(e.startDate)} - ${e.current ? 'Present' : fmtDate(e.endDate)}`.replace(/^ - $/, '');
           return [deg, e.school + (e.location ? `, ${e.location}` : ''), dates, e.details.trim()]
             .filter(Boolean)
             .join('\n');

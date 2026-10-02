@@ -93,7 +93,7 @@ function SectionBody({ r, id }: { r: Resume; id: SectionId }) {
               <div className="flex items-baseline justify-between gap-2">
                 <b>{[e.degree, e.field].filter(Boolean).join(', ')}</b>
                 <span className="shrink-0" style={{ fontSize: '0.92em' }}>
-                  {fmtDate(e.startDate)}{e.startDate && e.endDate && ' - '}{fmtDate(e.endDate)}
+                  {fmtDate(e.startDate)}{(e.startDate || e.endDate || e.current) && ' - '}{e.current ? 'Present' : fmtDate(e.endDate)}
                 </span>
               </div>
               <div>{[e.school, e.location].filter(Boolean).join(', ')}</div>

@@ -63,6 +63,7 @@ export function createSampleResume(): Resume {
       location: 'Seattle, WA',
       startDate: '2015-09',
       endDate: '2019-06',
+      current: false,
       details: '',
     },
   ];
