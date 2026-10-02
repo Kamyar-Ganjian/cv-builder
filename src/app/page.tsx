@@ -44,8 +44,8 @@ export default function BuilderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <div className="min-h-screen bg-slate-100 lg:flex lg:h-dvh lg:flex-col lg:overflow-hidden">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur lg:shrink-0">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-3 px-4 py-2.5">
           <div className="flex items-center gap-2">
             <span className="rounded bg-slate-900 px-2 py-1 text-xs font-bold uppercase tracking-wider text-white">CV</span>
@@ -74,9 +74,9 @@ export default function BuilderPage() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-[1400px] grid-cols-1 gap-6 px-4 py-6 lg:grid-cols-[minmax(380px,5fr)_7fr]">
+      <main className="mx-auto grid max-w-[1400px] grid-cols-1 gap-6 px-4 py-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(380px,5fr)_7fr] lg:overflow-hidden">
         {/* Editor column */}
-        <div className={mobileView === 'edit' ? 'block' : 'hidden lg:block'}>
+        <div className={`${mobileView === 'edit' ? 'block' : 'hidden lg:block'} builder-scroll lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-2`}>
           <nav className="mb-4 flex flex-wrap gap-1">
             {TABS.map((t) => (
               <button
@@ -109,8 +109,8 @@ export default function BuilderPage() {
         </div>
 
         {/* Preview column */}
-        <div className={mobileView === 'preview' ? 'block' : 'hidden lg:block'}>
-          <div className="lg:sticky lg:top-20">
+        <div className={`${mobileView === 'preview' ? 'block' : 'hidden lg:block'} builder-scroll lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-2`}>
+          <div>
             <ResumePreview />
             <p className="mt-3 text-center text-[11px] leading-snug text-slate-400">
               Grounded in Jobscan ATS research, Ladders eye-tracking, Harvard/Yale career guides and Google&apos;s
