@@ -1,4 +1,4 @@
-import type { Resume, SectionId } from '../types';
+import type { Resume, SectionId, SkillCategory } from '../types';
 
 export function hasContent(r: Resume, id: SectionId): boolean {
   switch (id) {
@@ -15,6 +15,37 @@ export function hasContent(r: Resume, id: SectionId): boolean {
 
 export function visibleSections(r: Resume): SectionId[] {
   return r.settings.sectionOrder.filter((id) => !r.settings.hiddenSections.includes(id) && hasContent(r, id));
+}
+
+export function skillCategoryRows(r: Resume): SkillCategory[][] {
+  const categories = r.skills.filter((category) => category.skills.trim());
+  const categoriesById = new Map(categories.map((category) => [category.id, category]));
+  const pairedWith = new Map<string, string>();
+
+  for (const [firstId, secondId] of r.skillPairs ?? []) {
+    if (
+      firstId === secondId ||
+      !categoriesById.has(firstId) ||
+      !categoriesById.has(secondId) ||
+      pairedWith.has(firstId) ||
+      pairedWith.has(secondId)
+    ) {
+      continue;
+    }
+    pairedWith.set(firstId, secondId);
+    pairedWith.set(secondId, firstId);
+  }
+
+  const rendered = new Set<string>();
+  return categories.flatMap((category) => {
+    if (rendered.has(category.id)) return [];
+    rendered.add(category.id);
+    const partnerId = pairedWith.get(category.id);
+    const partner = partnerId ? categoriesById.get(partnerId) : undefined;
+    if (!partner || rendered.has(partner.id)) return [[category]];
+    rendered.add(partner.id);
+    return [[category, partner]];
+  });
 }
 
 export function dataUrlToBytes(dataUrl: string): Uint8Array {

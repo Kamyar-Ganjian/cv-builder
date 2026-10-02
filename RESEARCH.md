@@ -38,7 +38,9 @@ and common parsing engines (Textkernel/Sovren, Affinda) used under the hood.
 **Consequences baked into the app:**
 - Single-column is the default and recommended layout.
 - "Hybrid" (main column + slim skills sidebar) is offered only with an explicit risk note.
-- Contact information always lives in the document body — never in a header/footer.
+- Optional skill-category pairs use two columns in PDF only and are off by default; DOCX keeps
+  skill categories in linear order because multi-column layouts can confuse legacy ATS parsers.
+- Contact information always lives in the document body - never in a header/footer.
 - No tables, no text boxes, no icons, no skill bars, no graphics anywhere in output.
 - Section headings are fixed to the standard set.
 
@@ -117,7 +119,8 @@ Google recruiting resume guidance, Jobscan keyword research.
 
 | Finding | Feature |
 |---|---|
-| Single-column safest; headers/footers dropped | Layout engine emits only linear-flow content; contact always in body |
+| Single-column safest; headers/footers dropped | Linear flow is the default; paired PDF skill rows are opt-in; contact stays in the body |
+| Multi-column layouts can confuse legacy ATS | Optional skill pairs are PDF-only and opt-in; DOCX remains linear |
 | Standard headings required | Fixed standard section labels |
 | docx safest on legacy, text-PDF on modern | Dual export: text-selectable PDF + .docx |
 | Photo is region-dependent | Country selector → recommendation + user override + tradeoff warning |

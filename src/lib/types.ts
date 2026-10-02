@@ -49,6 +49,8 @@ export interface SkillCategory {
   skills: string;
 }
 
+export type SkillCategoryPair = [string, string];
+
 export interface ExperienceItem {
   id: string;
   title: string;
@@ -132,6 +134,8 @@ export interface Resume {
   contact: ContactInfo;
   summary: string;
   skills: SkillCategory[];
+  /** Optional pairs of skill category IDs to place side by side in PDF output. */
+  skillPairs: SkillCategoryPair[];
   experience: ExperienceItem[];
   education: EducationItem[];
   projects: ProjectItem[];

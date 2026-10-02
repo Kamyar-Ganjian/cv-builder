@@ -83,6 +83,7 @@ export function createEmptyResume(name: string, countryCode?: string): Resume {
     contact: { ...emptyContact },
     summary: '',
     skills: [{ id: uid(), name: 'Core Competencies', skills: '' }],
+    skillPairs: [],
     experience: [],
     education: [],
     projects: [],
