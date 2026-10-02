@@ -14,8 +14,14 @@ type PdfPage = {
 type PdfDocumentProxy = {
   numPages: number;
   getPage: (pageNumber: number) => Promise<PdfPage>;
-  destroy: () => Promise<void>;
+  cleanup?: () => Promise<unknown>;
 };
+
+function releasePdfDocument(document: PdfDocumentProxy | null) {
+  if (document && typeof document.cleanup === 'function') {
+    void document.cleanup().catch(() => {});
+  }
+}
 
 export function ResumePreview() {
   const r = useActiveResume();
@@ -58,7 +64,7 @@ export function ResumePreview() {
         const data = new Uint8Array(await blob.arrayBuffer());
         const loaded = await pdfjs.getDocument({ data }).promise as unknown as PdfDocumentProxy;
         if (cancelled) {
-          await loaded.destroy();
+          releasePdfDocument(loaded);
           return;
         }
         loadedDocument = loaded;
@@ -75,7 +81,7 @@ export function ResumePreview() {
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
-      if (loadedDocument) void loadedDocument.destroy();
+      releasePdfDocument(loadedDocument);
     };
   }, [r]);
 

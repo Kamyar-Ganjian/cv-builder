@@ -1,6 +1,7 @@
 'use client';
 
 import { COUNTRIES, PHOTO_GUIDANCE, getCountry } from '../../lib/countries';
+import { estimatePages } from '../../lib/analysis/estimate';
 import { ACCENT_COLORS, FONT_OPTIONS } from '../../lib/defaults';
 import { useActiveResume, useBuilder } from '../../lib/store';
 import { SECTION_LABELS, type FontFamilyOption, type SectionId } from '../../lib/types';
@@ -132,9 +133,29 @@ function LayoutSection() {
 function TypographySection() {
   const r = useActiveResume();
   const updateSettings = useBuilder((s) => s.updateSettings);
+  const pages = estimatePages(r);
+  const fitToOnePage = () => updateSettings({ fontSize: 10, margin: 0.5 });
   return (
     <SectionCard className="space-y-3">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Typography & page</p>
+      <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-slate-800">Fit to one page</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
+              Uses the minimum ATS-safe font size and margins without deleting content.
+            </p>
+          </div>
+          <Button variant="secondary" size="xs" onClick={fitToOnePage} disabled={r.settings.fontSize === 10 && r.settings.margin === 0.5}>
+            {r.settings.fontSize === 10 && r.settings.margin === 0.5 ? 'Applied' : 'Fit'}
+          </Button>
+        </div>
+        {pages > 1 && (
+          <p className="mt-2 text-[11px] leading-snug text-amber-700">
+            Still estimated at {pages} pages. Shorten or remove lower-priority content rather than shrinking below ATS-safe limits.
+          </p>
+        )}
+      </div>
       <Select
         label="Font (ATS-safe set only)"
         value={r.settings.fontFamily}
