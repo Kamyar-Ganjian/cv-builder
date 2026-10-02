@@ -134,7 +134,14 @@ function TypographySection() {
   const r = useActiveResume();
   const updateSettings = useBuilder((s) => s.updateSettings);
   const pages = estimatePages(r);
-  const fitToOnePage = () => updateSettings({ fontSize: 10, margin: 0.5 });
+  const safeApplied = r.settings.fontSize === 10 && r.settings.margin === 0.5;
+  const fitToOnePage = () => {
+    const safeSettings = { fontSize: 10, margin: 0.5 };
+    const safeResume = { ...r, settings: { ...r.settings, ...safeSettings } };
+    const hybridResume = { ...safeResume, settings: { ...safeResume.settings, layout: 'hybrid' as const } };
+    const useHybrid = r.settings.layout === 'single' && estimatePages(safeResume) > 1 && estimatePages(hybridResume) < estimatePages(safeResume);
+    updateSettings({ ...safeSettings, ...(useHybrid ? { layout: 'hybrid' as const } : {}) });
+  };
   return (
     <SectionCard className="space-y-3">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Typography & page</p>
@@ -143,11 +150,11 @@ function TypographySection() {
           <div>
             <p className="text-sm font-medium text-slate-800">Fit to one page</p>
             <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
-              Uses the minimum ATS-safe font size and margins without deleting content.
+              Uses 10pt text and 0.5in margins without deleting content.
             </p>
           </div>
-          <Button variant="secondary" size="xs" onClick={fitToOnePage} disabled={r.settings.fontSize === 10 && r.settings.margin === 0.5}>
-            {r.settings.fontSize === 10 && r.settings.margin === 0.5 ? 'Applied' : 'Fit'}
+          <Button variant="secondary" size="xs" onClick={fitToOnePage} disabled={safeApplied && (r.settings.layout === 'hybrid' || pages <= 1)}>
+            {safeApplied && (r.settings.layout === 'hybrid' || pages <= 1) ? 'Applied' : safeApplied ? 'Try hybrid' : 'Fit'}
           </Button>
         </div>
         {pages > 1 && (

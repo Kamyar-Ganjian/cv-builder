@@ -135,7 +135,7 @@ export const useBuilder = create<BuilderState>()(
     }),
     {
       name: 'cv-builder-v1',
-      version: 4,
+      version: 5,
       migrate: (persistedState, version) => {
         let state = persistedState as Partial<BuilderState>;
         if (version < 3) {

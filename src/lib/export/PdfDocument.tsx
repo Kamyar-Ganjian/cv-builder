@@ -59,6 +59,7 @@ function makeStyles(r: Resume) {
     bulletDot: { width: 10 },
     bulletText: { flex: 1, lineHeight: 1.32 },
     row: { flexDirection: 'row', marginTop: 2 },
+    rowText: { marginTop: 2 },
     mainCol: { flex: 1, paddingRight: 14 },
     sideCol: { width: '31%' },
     link: { color: '#111827', textDecoration: 'none' },
@@ -92,7 +93,7 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
       return (
         <>
           {r.skills.filter((x) => x.skills.trim()).map((x) => (
-            <Text key={x.id} style={{ marginTop: 2 }}>
+            <Text key={x.id} style={s.rowText}>
               {x.name.trim() ? <Text style={s.bold}>{x.name}: </Text> : null}
               {x.skills}
             </Text>
@@ -160,7 +161,7 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
       return (
         <>
           {r.certifications.filter((c) => c.name.trim()).map((c) => (
-            <Text key={c.id} style={{ marginTop: 2 }}>
+            <Text key={c.id} style={s.rowText}>
               <Text style={s.bold}>{c.name}</Text>
               {[c.issuer, fmtDate(c.date)].filter(Boolean).length > 0 ? ' - ' : ''}
               {[c.issuer, fmtDate(c.date)].filter(Boolean).join(', ')}
@@ -178,7 +179,7 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
       return (
         <>
           {r.courses.filter((c) => c.name.trim()).map((c) => (
-            <Text key={c.id} style={{ marginTop: 2 }}>
+            <Text key={c.id} style={s.rowText}>
               <Text style={s.bold}>{c.name}</Text>
               {[c.provider, fmtDate(c.date)].filter(Boolean).length > 0 ? ' - ' : ''}
               {[c.provider, fmtDate(c.date)].filter(Boolean).join(', ')}
