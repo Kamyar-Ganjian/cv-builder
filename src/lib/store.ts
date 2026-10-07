@@ -120,6 +120,12 @@ export const useBuilder = create<BuilderState>()(
             ...data,
             contact: { ...defaults.contact, ...data.contact },
             settings: { ...defaultSettings(data.settings.country), ...data.settings },
+            skillPairs: Array.isArray(data.skillPairs)
+              ? data.skillPairs.filter(
+                  (pair) => Array.isArray(pair) && pair.length === 2 && pair.every((id) => typeof id === 'string')
+                )
+              : defaults.skillPairs,
+            education: (data.education ?? defaults.education).map((item) => ({ ...item, current: item.current ?? false })),
             id: uid(),
             updatedAt: Date.now(),
           };
@@ -134,10 +140,10 @@ export const useBuilder = create<BuilderState>()(
     }),
     {
       name: 'cv-builder-v1',
-      version: 3,
+      version: 6,
       migrate: (persistedState, version) => {
+        let state = persistedState as Partial<BuilderState>;
         if (version < 3) {
-          const state = persistedState as Partial<BuilderState>;
           const resumes = Object.fromEntries(
             Object.entries(state.resumes ?? {}).map(([id, resume]) => [
               id,
@@ -153,9 +159,30 @@ export const useBuilder = create<BuilderState>()(
               },
             ])
           );
-          return { ...state, resumes };
+          state = { ...state, resumes };
         }
-        return persistedState as BuilderState;
+        if (version < 4) {
+          const resumes = Object.fromEntries(
+            Object.entries(state.resumes ?? {}).map(([id, resume]) => [
+              id,
+              {
+                ...resume,
+                education: (resume.education ?? []).map((item) => ({ ...item, current: item.current ?? false })),
+              },
+            ])
+          );
+          state = { ...state, resumes };
+        }
+        if (version < 6) {
+          const resumes = Object.fromEntries(
+            Object.entries(state.resumes ?? {}).map(([id, resume]) => [
+              id,
+              { ...resume, skillPairs: resume.skillPairs ?? [] },
+            ])
+          );
+          state = { ...state, resumes };
+        }
+        return state as BuilderState;
       },
     }
   )

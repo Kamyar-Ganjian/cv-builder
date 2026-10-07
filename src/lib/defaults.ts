@@ -83,6 +83,7 @@ export function createEmptyResume(name: string, countryCode?: string): Resume {
     contact: { ...emptyContact },
     summary: '',
     skills: [{ id: uid(), name: 'Core Competencies', skills: '' }],
+    skillPairs: [],
     experience: [],
     education: [],
     projects: [],
@@ -96,7 +97,7 @@ export function newExperience(): ExperienceItem {
   return { id: uid(), title: '', company: '', location: '', startDate: '', endDate: '', current: false, bullets: [''] };
 }
 export function newEducation(): EducationItem {
-  return { id: uid(), school: '', degree: '', field: '', location: '', startDate: '', endDate: '', details: '' };
+  return { id: uid(), school: '', degree: '', field: '', location: '', startDate: '', endDate: '', current: false, details: '' };
 }
 export function newProject(): ProjectItem {
   return { id: uid(), name: '', link: '', tech: '', bullets: [''] };

@@ -27,7 +27,13 @@ export function EducationForm() {
             <TextInput label="Degree" value={e.degree} onChange={(v) => set(e.id, { degree: v })} placeholder="B.S." />
             <TextInput label="Field of study" value={e.field} onChange={(v) => set(e.id, { field: v })} placeholder="Computer Science" />
             <TextInput label="Start" type="month" value={e.startDate} onChange={(v) => set(e.id, { startDate: v })} />
-            <TextInput label="End" type="month" value={e.endDate} onChange={(v) => set(e.id, { endDate: v })} />
+            <div>
+              <TextInput label="End" type="month" value={e.endDate} onChange={(v) => set(e.id, { endDate: v })} />
+              <label className="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
+                <input type="checkbox" checked={e.current} onChange={(event) => set(e.id, { current: event.target.checked, endDate: event.target.checked ? '' : e.endDate })} />
+                Currently studying
+              </label>
+            </div>
           </div>
           <TextArea
             label="Details (optional)"

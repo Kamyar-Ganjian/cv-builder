@@ -3,7 +3,7 @@ import React from 'react';
 import { fmtDate } from '../analysis/plainText';
 import { getContactDetails, getContactLinks, groupContactLinks } from '../contactLinks';
 import { normalizeWebUrl } from '../urls';
-import { visibleSections } from './shared';
+import { skillCategoryRows, visibleSections } from './shared';
 import {
   MAIN_SECTIONS,
   SECTION_LABELS,
@@ -59,6 +59,10 @@ function makeStyles(r: Resume) {
     bulletDot: { width: 10 },
     bulletText: { flex: 1, lineHeight: 1.32 },
     row: { flexDirection: 'row', marginTop: 2 },
+    rowText: { marginTop: 2 },
+    skillPairRow: { flexDirection: 'row', marginTop: 2 },
+    skillPairCell: { flex: 1, minWidth: 0 },
+    skillPairFirstCell: { flex: 1, minWidth: 0, paddingRight: 10 },
     mainCol: { flex: 1, paddingRight: 14 },
     sideCol: { width: '31%' },
     link: { color: '#111827', textDecoration: 'none' },
@@ -91,11 +95,24 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
     case 'skills':
       return (
         <>
-          {r.skills.filter((x) => x.skills.trim()).map((x) => (
-            <Text key={x.id} style={{ marginTop: 2 }}>
-              {x.name.trim() ? <Text style={s.bold}>{x.name}: </Text> : null}
-              {x.skills}
-            </Text>
+          {skillCategoryRows(r).map((row) => (
+            row.length === 1 ? (
+              <Text key={row[0].id} style={s.rowText}>
+                {row[0].name.trim() ? <Text style={s.bold}>{row[0].name}: </Text> : null}
+                {row[0].skills}
+              </Text>
+            ) : (
+              <View key={row.map((category) => category.id).join('-')} style={s.skillPairRow}>
+                {row.map((category, index) => (
+                  <View key={category.id} style={index === 0 ? s.skillPairFirstCell : s.skillPairCell}>
+                    <Text style={s.rowText}>
+                      {category.name.trim() ? <Text style={s.bold}>{category.name}: </Text> : null}
+                      {category.skills}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )
           ))}
         </>
       );
@@ -127,8 +144,8 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
                 <Text style={s.bold}>{[e.degree, e.field].filter(Boolean).join(', ')}</Text>
                 <Text style={s.small}>
                   {fmtDate(e.startDate)}
-                  {e.startDate && e.endDate ? ' - ' : ''}
-                  {fmtDate(e.endDate)}
+                  {e.startDate || e.endDate || e.current ? ' - ' : ''}
+                  {e.current ? 'Present' : fmtDate(e.endDate)}
                 </Text>
               </View>
               <Text>{[e.school, e.location].filter(Boolean).join(', ')}</Text>
@@ -160,7 +177,7 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
       return (
         <>
           {r.certifications.filter((c) => c.name.trim()).map((c) => (
-            <Text key={c.id} style={{ marginTop: 2 }}>
+            <Text key={c.id} style={s.rowText}>
               <Text style={s.bold}>{c.name}</Text>
               {[c.issuer, fmtDate(c.date)].filter(Boolean).length > 0 ? ' - ' : ''}
               {[c.issuer, fmtDate(c.date)].filter(Boolean).join(', ')}
@@ -178,7 +195,7 @@ function SectionBody({ r, id, s }: { r: Resume; id: SectionId; s: S }) {
       return (
         <>
           {r.courses.filter((c) => c.name.trim()).map((c) => (
-            <Text key={c.id} style={{ marginTop: 2 }}>
+            <Text key={c.id} style={s.rowText}>
               <Text style={s.bold}>{c.name}</Text>
               {[c.provider, fmtDate(c.date)].filter(Boolean).length > 0 ? ' - ' : ''}
               {[c.provider, fmtDate(c.date)].filter(Boolean).join(', ')}

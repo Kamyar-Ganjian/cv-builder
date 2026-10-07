@@ -2,7 +2,7 @@
 
 import { newSkillCategory, uid } from '../../lib/defaults';
 import { useActiveResume, useBuilder } from '../../lib/store';
-import { Button, InfoBox, SectionCard, TextInput } from '../ui';
+import { Button, InfoBox, SectionCard, Select, TextInput } from '../ui';
 
 export function SkillsForm() {
   const r = useActiveResume();
@@ -15,6 +15,10 @@ export function SkillsForm() {
         8-20 relevant hard skills, categorized (Languages, Frontend, Tools &amp; DevOps…).{' '}
         <b>Copy exact phrasing from the job description</b> - ATS keyword matching is literal. No skill bars or
         star ratings: parsers ignore them and recruiters distrust them.
+      </InfoBox>
+      <InfoBox tone="warn">
+        Use Category layout to place two categories side by side in the PDF. DOCX keeps categories stacked for safer
+        ATS parsing; columns may be harder for some ATS to read.
       </InfoBox>
       {r.skills.map((cat, i) => (
         <SectionCard key={cat.id} className="space-y-2">
@@ -50,11 +54,44 @@ export function SkillsForm() {
                 variant="danger"
                 size="xs"
                 title="Remove category"
-                onClick={() => update((p) => ({ ...p, skills: p.skills.filter((s) => s.id !== cat.id) }))}
+                onClick={() =>
+                  update((p) => ({
+                    ...p,
+                    skills: p.skills.filter((s) => s.id !== cat.id),
+                    skillPairs: (p.skillPairs ?? []).filter((pair) => !pair.includes(cat.id)),
+                  }))
+                }
               >
                 Remove
               </Button>
             </div>
+          </div>
+          <div className="flex items-end justify-between gap-3">
+            <div className="w-56">
+              <Select
+                label="Category layout"
+                value={r.skillPairs?.find((pair) => pair.includes(cat.id))?.find((id) => id !== cat.id) ?? ''}
+                onChange={(partnerId) =>
+                  update((p) => {
+                    const pairs = (p.skillPairs ?? []).filter(
+                      (pair) => !pair.includes(cat.id) && (!partnerId || !pair.includes(partnerId))
+                    );
+                    if (partnerId) pairs.push([cat.id, partnerId]);
+                    return { ...p, skillPairs: pairs };
+                  })
+                }
+                options={[
+                  { value: '', label: 'Full width' },
+                  ...r.skills.filter((other) => other.id !== cat.id).map((other) => ({
+                    value: other.id,
+                    label: `Beside ${other.name.trim() || 'Untitled category'}`,
+                  })),
+                ]}
+              />
+            </div>
+            {r.skillPairs?.some((pair) => pair.includes(cat.id)) && (
+              <p className="pb-2 text-[11px] text-slate-500">Paired categories share the available width.</p>
+            )}
           </div>
           {i === 0 && (
             <p className="text-[11px] text-slate-400">

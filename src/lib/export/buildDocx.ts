@@ -96,7 +96,7 @@ export async function buildDocx(r: Resume): Promise<Blob> {
         });
       case 'education':
         return r.education.filter((e) => e.school.trim() || e.degree.trim()).flatMap((e) => {
-          const paras: Paragraph[] = [entryHead([e.degree, e.field].filter(Boolean).join(', '), dateRange(e.startDate, e.endDate, false))];
+          const paras: Paragraph[] = [entryHead([e.degree, e.field].filter(Boolean).join(', '), dateRange(e.startDate, e.endDate, e.current))];
           paras.push(new Paragraph({ children: [run([e.school, e.location].filter(Boolean).join(', '))], spacing: { after: 20 } }));
           if (e.details.trim()) paras.push(new Paragraph({ children: [run(e.details, { color: '475569', size: halfPt - 1 })], spacing: { after: 20 } }));
           return paras;
